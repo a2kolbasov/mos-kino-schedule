@@ -4,64 +4,84 @@
 // @description  try to take over the world!
 // @author       A. Kolbasov
 // @match        https://mos-kino.ru/schedule/*
-// @icon         data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
 // @grant        none
-// @require      https://momentjs.com/downloads/moment-with-locales.js
-// @require      https://momentjs.com/downloads/moment-timezone-with-data-10-year-range.js
 // ==/UserScript==
-
 
 const url = new URL(window.location.href)
 
+/** @type {HTMLDivElement} */
+const datePicker = document.querySelector('.date-picker')
+
 const dateUtils = (new class {
     /** @type {string[]} */
-    dates = Array.from(document.querySelectorAll('.date-picker [data-date]')).map(node => node.getAttribute('data-date'))
+    dates = Array.from(datePicker.querySelectorAll('[data-date]')).map(node => node.getAttribute('data-date'))
 
-    currentDate = url.searchParams.get('date') || new Date().toLocaleDateString('sv' /* ISO 8601 */, { timeZone: 'Europe/Moscow' })
+    currentDate = url.searchParams.get('date') || new Date().toLocaleDateString('sv' /* like ISO 8601 */, { timeZone: 'Europe/Moscow' })
 
     /**
-     * @param {string} currentDate
      * @returns {?string}
      */
-    nextDate(currentDate) {
-        let index = this.dates.indexOf(currentDate)
+    nextDate() {
+        let index = this.dates.indexOf(this.currentDate)
         if (index < 0 || index + 1 === this.dates.length) return null
         return this.dates[index + 1]
     }
 
     /**
-     * @param {string} currentDate
      * @returns {?string}
      */
-    prevDate(currentDate) {
-        let index = this.dates.indexOf(currentDate)
+    prevDate() {
+        let index = this.dates.indexOf(this.currentDate)
         if (index <= 0) return null
         return this.dates[index - 1]
+    }
+
+    /**
+     * @param {string} date
+     * @returns {string}
+     */
+    weekday(date) {
+        return new Date(date).toLocaleString('ru', { weekday: 'short' }).toUpperCase()
     }
 }());
 
 
 (function addButtons() {
     /** @type {HTMLDivElement} */
-    const picker = document.querySelector('.date-picker')
-    picker.style.minWidth = 'unset'
+    datePicker.style.minWidth = 'unset'
 
-    const prev = document.createElement('a')
-    const next = document.createElement('a')
-    picker.before(prev)
-    picker.after(next)
-    // picker.append(prev)
-    // picker.append(next)
+    const prevBtn = document.createElement('a')
+    const nextBtn = document.createElement('a')
+    datePicker.before(prevBtn)
+    datePicker.after(nextBtn)
 
-    prev.innerHTML = '🔙'
-    next.innerHTML = '🔜'
-    prev.style.fontSize = 'x-large'
-    next.style.fontSize = 'x-large'
+    prevBtn.textContent = '🔙'
+    nextBtn.textContent = '🔜'
+    prevBtn.style.fontSize = 'x-large'
+    nextBtn.style.fontSize = 'x-large'
 
     const prevDate = dateUtils.prevDate(dateUtils.currentDate)
     const nextDate = dateUtils.nextDate(dateUtils.currentDate)
-    if (prevDate) prev.href = changeDate(prevDate).search
-    if (nextDate) next.href = changeDate(nextDate).search
+    if (prevDate) prevBtn.href = changeDate(prevDate).search
+    if (nextDate) nextBtn.href = changeDate(nextDate).search
+})();
+
+(function addWeekday() {
+    const label = datePicker.querySelector('.label')
+    const dateElement = label.querySelector('.value')
+    const input = label.querySelector('input')
+
+    const weedayElement = document.createElement('span')
+    label.append(weedayElement)
+
+    function changeWeekday() {
+        if (!/^\d/.test(dateElement.textContent)) return // если дата не выбрана
+        let weekday = dateUtils.weekday(input.value || dateUtils.currentDate)
+        weedayElement.textContent = `(${weekday})`
+    }
+
+    input.addEventListener('change', changeWeekday)
+    changeWeekday()
 })();
 
 /**
