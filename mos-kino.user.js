@@ -1,10 +1,10 @@
 ﻿// ==UserScript==
-// @name         Mos-kino 2
-// @version      0.1
-// @description  try to take over the world!
-// @author       A. Kolbasov
-// @match        https://mos-kino.ru/schedule/*
-// @grant        none
+// @name            Mos-kino 2
+// @version         0.1
+// @description     Перемещение по календарю назад/вперёд, день недели у выбранной даты
+// @author          Aleksandr Kolbasov
+// @match           https://mos-kino.ru/schedule/*
+// @grant           none
 // ==/UserScript==
 
 const url = new URL(window.location.href)
@@ -47,7 +47,6 @@ const dateUtils = (new class {
 
 
 (function addButtons() {
-    /** @type {HTMLDivElement} */
     datePicker.style.minWidth = 'unset'
 
     const prevBtn = document.createElement('a')
@@ -55,8 +54,8 @@ const dateUtils = (new class {
     datePicker.before(prevBtn)
     datePicker.after(nextBtn)
 
-    prevBtn.textContent = '🔙'
-    nextBtn.textContent = '🔜'
+    prevBtn.textContent = '\u{1f519}' // 🔙
+    nextBtn.textContent = '\u{1f51c}' // 🔜
     prevBtn.style.fontSize = 'x-large'
     nextBtn.style.fontSize = 'x-large'
 
@@ -80,7 +79,7 @@ const dateUtils = (new class {
         weedayElement.textContent = `(${weekday})`
     }
 
-    input.addEventListener('change', changeWeekday)
+    datePicker.querySelector('.calendar-slider').addEventListener('click', changeWeekday) // todo: из 1-ого скрипта
     changeWeekday()
 })();
 
