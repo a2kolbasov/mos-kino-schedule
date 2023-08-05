@@ -67,8 +67,8 @@ const page = (new class {
 
         const prevDate = dates.prevDate();
         const nextDate = dates.nextDate();
-        if (prevDate) prevBtn.href = getUrlWithNewDate(prevDate).search;
-        if (nextDate) nextBtn.href = getUrlWithNewDate(nextDate).search;
+        if (prevDate) prevBtn.href = getUrlWithDate(prevDate).search;
+        if (nextDate) nextBtn.href = getUrlWithDate(nextDate).search;
     }
 
     addWeekday() {
@@ -91,12 +91,12 @@ const page = (new class {
 }());
 
 /**
- * @param {string} newDate
+ * @param {string} date
  * @returns {URL}
  */
-function getUrlWithNewDate(newDate) {
+function getUrlWithDate(date) {
     const changedUrl = new URL(url);
-    changedUrl.searchParams.set('date', newDate);
+    changedUrl.searchParams.set('date', date);
     return changedUrl;
 }
 
