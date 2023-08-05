@@ -51,43 +51,44 @@ const dates = (new class {
     }
 }());
 
+const page = (new class {
+    addButtons() {
+        datePicker.style.minWidth = 'unset';
 
-(function addButtons() {
-    datePicker.style.minWidth = 'unset';
+        const prevBtn = document.createElement('a');
+        const nextBtn = document.createElement('a');
+        datePicker.before(prevBtn);
+        datePicker.after(nextBtn);
 
-    const prevBtn = document.createElement('a');
-    const nextBtn = document.createElement('a');
-    datePicker.before(prevBtn);
-    datePicker.after(nextBtn);
+        prevBtn.textContent = '\u{1f519}'; // 🔙
+        nextBtn.textContent = '\u{1f51c}'; // 🔜
+        prevBtn.style.fontSize = 'x-large';
+        nextBtn.style.fontSize = 'x-large';
 
-    prevBtn.textContent = '\u{1f519}'; // 🔙
-    nextBtn.textContent = '\u{1f51c}'; // 🔜
-    prevBtn.style.fontSize = 'x-large';
-    nextBtn.style.fontSize = 'x-large';
-
-    const prevDate = dates.prevDate();
-    const nextDate = dates.nextDate();
-    if (prevDate) prevBtn.href = getUrlWithNewDate(prevDate).search;
-    if (nextDate) nextBtn.href = getUrlWithNewDate(nextDate).search;
-})();
-
-(function addWeekday() {
-    const label = datePicker.querySelector('.label');
-    const dateElement = label.querySelector('.value');
-    const input = label.querySelector('input');
-
-    const weedayElement = document.createElement('span');
-    label.append(weedayElement);
-
-    function changeWeekday() {
-        if (!/^\d/.test(dateElement.textContent)) return; // если дата не выбрана
-        let weekday = dates.toWeekday(input.value || dates.currentDate);
-        weedayElement.textContent = `(${weekday})`;
+        const prevDate = dates.prevDate();
+        const nextDate = dates.nextDate();
+        if (prevDate) prevBtn.href = getUrlWithNewDate(prevDate).search;
+        if (nextDate) nextBtn.href = getUrlWithNewDate(nextDate).search;
     }
 
-    datePicker.querySelector('.calendar-slider').addEventListener('click', changeWeekday); // todo: из 1-ого скрипта
-    changeWeekday();
-})();
+    addWeekday() {
+        const label = datePicker.querySelector('.label');
+        const dateElement = label.querySelector('.value');
+        const input = label.querySelector('input');
+
+        const weedayElement = document.createElement('span');
+        label.append(weedayElement);
+
+        function changeWeekday() {
+            if (!/^\d/.test(dateElement.textContent)) return; // если дата не выбрана
+            let weekday = dates.toWeekday(input.value || dates.currentDate);
+            weedayElement.textContent = `(${weekday})`;
+        }
+
+        datePicker.querySelector('.calendar-slider').addEventListener('click', changeWeekday); // todo: из 1-ого скрипта
+        changeWeekday();
+    }
+}());
 
 /**
  * @param {string} newDate
@@ -98,3 +99,10 @@ function getUrlWithNewDate(newDate) {
     changedUrl.searchParams.set('date', newDate);
     return changedUrl;
 }
+
+///
+// init
+///
+
+page.addButtons();
+page.addWeekday();
