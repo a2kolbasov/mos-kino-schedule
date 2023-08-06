@@ -37,17 +37,22 @@
          * @returns {?string}
          */
         nextDate() {
-            let index = this.availableDates.indexOf(this.currentDate);
-            if (index < 0 || index + 1 === this.availableDates.length) return null;
-            return this.availableDates[index + 1];
+            let index = this.indexOfDate(this.currentDate);
+            if (index + 1 >= this.availableDates.length) return null;
+
+            /**
+             * если текущий даты нет в массиве, под найденным индексом сохранён следующий доступный в расписании день (@see {@link indexOfDate})
+             */
+            let currentOrNextDate = this.availableDates[index];
+            return currentOrNextDate === this.currentDate ? this.availableDates[index + 1] : currentOrNextDate;
         }
 
         /**
          * @returns {?string}
          */
         prevDate() {
-            let index = this.availableDates.indexOf(this.currentDate);
-            if (index <= 0) return null;
+            let index = this.indexOfDate(this.currentDate);
+            if (index === 0) return null;
             return this.availableDates[index - 1];
         }
 
@@ -57,6 +62,26 @@
          */
         toWeekday(date) {
             return new Date(date).toLocaleString('ru', { weekday: 'short' }).toUpperCase();
+        }
+
+        /**
+         * Выдаёт индекс в массиве расписания, под которым строка с датой должна находится в отсортированном массиве.
+         * Она не обязана быть в этом массиве (для случаев отсутствия запланированных событий на данную дату).
+         * Если строки нет в массиве, то индекс обозначает место, куда она бы вклинилась бы в отсортированном массиве.
+         * Для массива `[1, 5]` поиск элемента `3` вернёт индекс `1` -- как для `[1, 3, 5]`.
+         * @param {string} date
+         * @param {number} [startIndex]
+         * @param {number} [endIndex]
+         * @returns {number}
+         */
+        indexOfDate(date, startIndex = 0, endIndex = dates.availableDates.length) {
+            if (startIndex === endIndex) return startIndex;
+            let midIndex = Math.round((endIndex - startIndex) / 2) + startIndex - 1;
+            let midDate = dates.availableDates[midIndex];
+
+            if (date < midDate) return this.indexOfDate(date, startIndex, midIndex);
+            if (date > midDate) return this.indexOfDate(date, midIndex + 1, endIndex);
+            return midIndex;
         }
     }());
 
@@ -105,5 +130,15 @@
 
         datePicker.querySelector('.calendar-slider').addEventListener('click', changeWeekday);
         changeWeekday();
+    })();
+
+    (function autoclickOnDateSelect() {
+        datePicker.querySelector('.calendar-slider').addEventListener('click', e => {
+            if (e.target.getAttribute('data-date')) {
+                queueMicrotask(() => {
+                    datePicker.querySelector('.bt').click();
+                });
+            }
+        });
     })();
 })();
