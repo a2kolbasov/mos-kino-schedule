@@ -1,14 +1,11 @@
-﻿// @ts-check
-
 // ==UserScript==
-// @name            Improved Moskino schedule
+// @name            Улучшенное расписание Москино
 // @namespace       github.com/a2kolbasov
-// @version         snapshot
-// @description     Adds buttons to quickly switch to the next / previous day of the schedule, displays the day of the week for the selected date
-// @name:ru         Улучшенное расписание Москино
-// @description:ru  Добавляет кнопки быстрого переключения на следующий / предыдущий день расписания, отображает день недели выбранной даты
+// @version         1.0.0
+// @description     Добавляет кнопки быстрого переключения на следующий / предыдущий день расписания, отображает день недели выбранной даты
 // @author          Aleksandr Kolbasov
 // @license         MPL-2.0
+// @icon            https://www.google.com/s2/favicons?sz=64&domain=mos-kino.ru
 // @match           https://mos-kino.ru/schedule/*
 // @grant           none
 // ==/UserScript==
@@ -106,23 +103,7 @@
             weedayElement.textContent = `(${weekday})`;
         }
 
-        datePicker.querySelector('.calendar-slider').addEventListener('click', changeWeekday); // todo: из 1-ого скрипта
+        datePicker.querySelector('.calendar-slider').addEventListener('click', changeWeekday);
         changeWeekday();
     })();
 })();
-
-/**
- * @param {string} date
- * @param {number} startIndex
- * @param {number} endIndex
- * @returns {number} index
- */
-function indexOfDate(arr, date, startIndex, endIndex) {
-    let midIndex = Math.round((endIndex - startIndex) / 2) + startIndex - 1;
-    let midDate = arr[midIndex];
-    // let midDate = dates.availableDates[midIndex];
-
-    if (date < midDate) return indexOfDate(arr, date, startIndex, midIndex);
-    if (date > midDate) return indexOfDate(arr, date, midIndex + 1, endIndex);
-    return midIndex;
-}
