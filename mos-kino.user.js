@@ -1,58 +1,79 @@
 ﻿// @ts-check
 
 // ==UserScript==
-// @name            Mos-kino 2
-// @version         0.1
-// @description     Перемещение по календарю назад/вперёд, день недели у выбранной даты
+// @name            Improved Moskino schedule
+// @namespace       github.com/a2kolbasov
+// @version         snapshot
+// @description     Adds buttons to quickly switch to the next / previous day of the schedule, displays the day of the week for the selected date
+// @name:ru         Улучшенное расписание Москино
+// @description:ru  Добавляет кнопки быстрого переключения на следующий / предыдущий день расписания, отображает день недели выбранной даты
 // @author          Aleksandr Kolbasov
+// @license         MPL-2.0
 // @match           https://mos-kino.ru/schedule/*
 // @grant           none
 // ==/UserScript==
 
-const url = new URL(window.location.href);
+/*
+ * Copyright © 2023 Aleksandr Kolbasov
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
 
-/** @type {HTMLDivElement} */
-const datePicker = document.querySelector('.date-picker');
+(() => {
+    const url = new URL(window.location.href);
 
-const dates = (new class {
+    /** @type {HTMLDivElement} */
+    const datePicker = document.querySelector('.date-picker');
+
+    const dates = (new class {
+        /**
+         * Доступные в расписании даты
+         * @type {string[]}
+         */
+        availableDates = Array.from(datePicker.querySelectorAll('[data-date]')).map(node => node.getAttribute('data-date'));
+
+        currentDate = url.searchParams.get('date') || new Date().toLocaleDateString('sv' /* like ISO 8601 */, { timeZone: 'Europe/Moscow' });
+
+        /**
+         * @returns {?string}
+         */
+        nextDate() {
+            let index = this.availableDates.indexOf(this.currentDate);
+            if (index < 0 || index + 1 === this.availableDates.length) return null;
+            return this.availableDates[index + 1];
+        }
+
+        /**
+         * @returns {?string}
+         */
+        prevDate() {
+            let index = this.availableDates.indexOf(this.currentDate);
+            if (index <= 0) return null;
+            return this.availableDates[index - 1];
+        }
+
+        /**
+         * @param {string} date
+         * @returns {string}
+         */
+        toWeekday(date) {
+            return new Date(date).toLocaleString('ru', { weekday: 'short' }).toUpperCase();
+        }
+    }());
+
     /**
-     * Доступные в расписании даты
-     * @type {string[]}
-     */
-    availableDates = Array.from(datePicker.querySelectorAll('[data-date]')).map(node => node.getAttribute('data-date'));
-
-    currentDate = url.searchParams.get('date') || new Date().toLocaleDateString('sv' /* like ISO 8601 */, { timeZone: 'Europe/Moscow' });
-
-    /**
-     * @returns {?string}
-     */
-    nextDate() {
-        let index = this.availableDates.indexOf(this.currentDate);
-        if (index < 0 || index + 1 === this.availableDates.length) return null;
-        return this.availableDates[index + 1];
-    }
-
-    /**
-     * @returns {?string}
-     */
-    prevDate() {
-        let index = this.availableDates.indexOf(this.currentDate);
-        if (index <= 0) return null;
-        return this.availableDates[index - 1];
-    }
-
-    /**
-     *
      * @param {string} date
-     * @returns {string}
+     * @returns {URL}
      */
-    toWeekday(date) {
-        return new Date(date).toLocaleString('ru', { weekday: 'short' }).toUpperCase();
+    function getUrlWithDate(date) {
+        const changedUrl = new URL(url);
+        changedUrl.searchParams.set('date', date);
+        return changedUrl;
     }
-}());
 
-const page = (new class {
-    addButtons() {
+    (function addButtons() {
         datePicker.style.minWidth = 'unset';
 
         const prevBtn = document.createElement('a');
@@ -69,9 +90,9 @@ const page = (new class {
         const nextDate = dates.nextDate();
         if (prevDate) prevBtn.href = getUrlWithDate(prevDate).search;
         if (nextDate) nextBtn.href = getUrlWithDate(nextDate).search;
-    }
+    })();
 
-    addWeekday() {
+    (function addWeekday() {
         const label = datePicker.querySelector('.label');
         const dateElement = label.querySelector('.value');
         const input = label.querySelector('input');
@@ -87,22 +108,21 @@ const page = (new class {
 
         datePicker.querySelector('.calendar-slider').addEventListener('click', changeWeekday); // todo: из 1-ого скрипта
         changeWeekday();
-    }
-}());
+    })();
+})();
 
 /**
  * @param {string} date
- * @returns {URL}
+ * @param {number} startIndex
+ * @param {number} endIndex
+ * @returns {number} index
  */
-function getUrlWithDate(date) {
-    const changedUrl = new URL(url);
-    changedUrl.searchParams.set('date', date);
-    return changedUrl;
+function indexOfDate(arr, date, startIndex, endIndex) {
+    let midIndex = Math.round((endIndex - startIndex) / 2) + startIndex - 1;
+    let midDate = arr[midIndex];
+    // let midDate = dates.availableDates[midIndex];
+
+    if (date < midDate) return indexOfDate(arr, date, startIndex, midIndex);
+    if (date > midDate) return indexOfDate(arr, date, midIndex + 1, endIndex);
+    return midIndex;
 }
-
-///
-// init
-///
-
-page.addButtons();
-page.addWeekday();
