@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Улучшенное расписание Москино
 // @namespace       github.com/a2kolbasov
-// @version         1.0.0
+// @version         1.1.0
 // @description     Добавляет кнопки быстрого переключения на следующий / предыдущий день расписания, отображает день недели выбранной даты
 // @author          Aleksandr Kolbasov
 // @license         MPL-2.0
@@ -103,8 +103,8 @@
         datePicker.before(prevBtn);
         datePicker.after(nextBtn);
 
-        prevBtn.textContent = '\u{1f519}'; // 🔙
-        nextBtn.textContent = '\u{1f51c}'; // 🔜
+        prevBtn.textContent = '\u2190'; // ←
+        nextBtn.textContent = '\u2192'; // →
         prevBtn.style.fontSize = 'x-large';
         nextBtn.style.fontSize = 'x-large';
 
