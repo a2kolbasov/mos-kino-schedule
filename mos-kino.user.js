@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Улучшенное расписание Москино
 // @namespace       github.com/a2kolbasov
-// @version         1.1.0
+// @version         1.1.1
 // @description     Добавляет кнопки быстрого переключения на следующий / предыдущий день расписания, отображает день недели выбранной даты
 // @author          Aleksandr Kolbasov
 // @license         MPL-2.0
@@ -19,6 +19,8 @@
  */
 
 (() => {
+    'use strict';
+
     const url = new URL(window.location.href);
 
     /** @type {HTMLDivElement} */
